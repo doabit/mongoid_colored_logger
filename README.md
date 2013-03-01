@@ -1,6 +1,6 @@
 # Mongoid Colored Logger
 
-The gem brings the beauty of colored logging to Mongoid.
+The gem brings the beauty of colored logging to Mongoid 3+.
 
 ## Installation:
 

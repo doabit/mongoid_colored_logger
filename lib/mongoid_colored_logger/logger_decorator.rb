@@ -16,12 +16,12 @@ module MongoidColoredLogger
       @logger = logger
     end
 
-    colorize_method = Mongoid::VERSION.to_f >= 3.0 ? :colorize_message : :colorize_legacy_message
+    # colorize_method = Mongoid::VERSION.to_f >= 3.0 ? :colorize_message : :colorize_legacy_message
 
     %w[debug info warn error fatal unknown].each.with_index do |method, severity|
       define_method(method) do |message = nil, progname = nil, &block|
         message = block.call if message.nil? and block
-        message = self.send(colorize_method, message.to_s)
+        message = self.send(:colorize_message, message.to_s)
 
         @logger.add(severity, message, progname, &block)
       end
@@ -43,13 +43,6 @@ module MongoidColoredLogger
       "#{bold}#{color}#{text}#{CLEAR}"
     end
 
-    # Used for Mongoid < 3.0
-    def colorize_legacy_message(message)
-      message.sub('MONGODB', color('MONGODB', odd? ? CYAN : MAGENTA)).
-        sub(%r{(?<=\[')([^']+)}) {|m| color(m, BLUE)}.
-        sub(%r{(?<=\]\.)\w+}) {|m| color(m, YELLOW)}
-    end
-
     # Used for Mongoid >= 3.0
     def colorize_message(message)
       message = message.sub('MONGODB', color('MONGODB', odd? ? CYAN : MAGENTA)).
@@ -57,7 +50,7 @@ module MongoidColoredLogger
         sub(%r{(?<=\]\.)\w+}) {|m| color(m, YELLOW)}
       message.sub('MOPED:', color('MOPED:', odd? ? CYAN : MAGENTA)).
         sub(/\{.+?\}\s/) { |m| color(m, BLUE) }.
-        sub(/COMMAND|QUERY|KILL_CURSORS/) { |m| color(m, YELLOW) }.
+        sub(/COMMAND|QUERY|KILL_CURSORS|INSERT|UPDATE|DELETE/) { |m| color(m, YELLOW) }.
         sub(/[\d\.]+ms/) { |m| color(m, GREEN) }
     end
 
